@@ -623,6 +623,24 @@ program cfd_backend
             omega(N,j) = -2.0 * psi(N-1,j) / (dx * dx)                    
         end do
 
+        !enforces the vorticity boundary conditions for the cylinder
+        if (cylinder_on) then
+            do i = 2, N-1
+                do j = 2, N-1
+                    if (mask(i,j) .and. .not. mask(i+1,j)) then
+                        omega(i,j) = -2.0 * psi(i,j) / (dx*dx)
+                    else if (mask(i,j) .and. .not. mask(i-1,j)) then
+                        omega(i,j) = -2.0 * psi(i,j) / (dx*dx)
+                    else if (mask(i,j) .and. .not. mask(i,j+1)) then
+                        omega(i,j) = -2.0 * psi(i,j) / (dy*dy)
+                    else if (mask(i,j) .and. .not. mask(i,j-1)) then
+                        omega(i,j) = -2.0 * psi(i,j) / (dy*dy)
+                    end if
+        
+                end do
+            end do
+        end if
+
         !solves the Poisson equation for the streamfunction
         select case (trim(poisson_solver))
             case ("Jacobi")
@@ -728,6 +746,26 @@ program cfd_backend
             omega(1,j) = -2.0 * (psi(2,j) - U * dy * (j - 1)) / (dx * dx)
             omega(N,j) = -2.0 * psi(N-1,j) / (dx * dx)
         end do
+
+        !reapplies the vorticity boundary conditions for the cylinder
+        if (cylinder_on) then
+            do i = 2, N-1
+                do j = 2, N-1
+
+                    if (mask(i,j) .and. .not. mask(i+1,j)) then
+                        omega(i,j) = -2.0 * psi(i,j) / (dx*dx)
+                    else if (mask(i,j) .and. .not. mask(i-1,j)) then
+                        omega(i,j) = -2.0 * psi(i,j) / (dx*dx)
+                    else if (mask(i,j) .and. .not. mask(i,j+1)) then
+                        omega(i,j) = -2.0 * psi(i,j) / (dy*dy)
+                    else if (mask(i,j) .and. .not. mask(i,j-1)) then
+                        omega(i,j) = -2.0 * psi(i,j) / (dy*dy)
+                    end if
+
+                end do
+            end do
+        end if
+
 
         !enforces the cylinder mask for vorticity
         if (cylinder_on) then
